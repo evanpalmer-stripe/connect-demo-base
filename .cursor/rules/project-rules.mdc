@@ -60,6 +60,24 @@ alwaysApply: true
 
 **State Management**: Use React's built-in state management (`useState`, `useContext`) unless a global state library is explicitly requested.
 
+**Design Principles**:
+- **Clean & Minimal**: Prioritize clean, uncluttered interfaces with plenty of white space
+- **Consistent Spacing**: Use Tailwind's spacing scale consistently (4, 8, 12, 16, 24, 32, 48, 64, 96, 128)
+- **Typography Hierarchy**: Use clear typography scales with proper contrast ratios
+- **Color Palette**: Stick to a limited, cohesive color palette (max 3-4 primary colors)
+- **Visual Hierarchy**: Use size, weight, and color to create clear information hierarchy
+- **Mobile-First**: Design for mobile first, then enhance for larger screens
+- **Accessibility**: Ensure proper contrast ratios (4.5:1 for normal text, 3:1 for large text)
+- **Loading States**: Always include loading states and empty states for better UX
+- **Error States**: Design clear, helpful error messages and states
+
+**Component Design Guidelines**:
+- **Single Purpose**: Each component should have one clear purpose
+- **Reusable**: Design components to be reusable across different contexts
+- **Composable**: Build complex UIs by combining simple, focused components
+- **Consistent Props**: Use consistent prop naming and structure across similar components
+- **Default States**: Provide sensible defaults for all component props
+
 ## 3. Back-end Rules (Node.js & Express)
 
 **Centralized Error Handling**: For simple projects, basic error handling is acceptable. No need to implement a dedicated Express middleware for global error handling.
