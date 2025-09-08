@@ -78,6 +78,34 @@ alwaysApply: true
 - **Consistent Props**: Use consistent prop naming and structure across similar components
 - **Default States**: Provide sensible defaults for all component props
 
+**Modular Architecture Rules**:
+- **Component Separation**: Never put multiple distinct UI features in a single component file
+- **Feature Isolation**: Each major feature should have its own component directory
+- **Logic Separation**: Keep business logic separate from UI components - use custom hooks for complex state management
+- **API Layer**: Create dedicated API service files for all external data fetching
+- **Utility Functions**: Extract reusable logic into separate utility files
+- **Constants**: Define all magic numbers, strings, and configuration in dedicated constants files
+
+**File Organization Standards**:
+- **Component Structure**: Each component should be in its own file with matching directory name
+- **Index Files**: Use index.js files to create clean import paths for component directories
+- **Naming Convention**: Component files must match their export name exactly
+- **Co-location**: Keep related files (styles, tests, types) close to their components when possible
+
+**Reusability Requirements**:
+- **Prop Interface**: Every reusable component must have a clear, documented prop interface
+- **Default Props**: Provide sensible defaults for all optional props
+- **Composition over Configuration**: Prefer composition patterns over complex prop configurations
+- **Generic Components**: Create generic base components (Button, Input, Card) that can be styled via props
+- **Hook Extraction**: Extract complex component logic into custom hooks for reusability
+
+**Maintainability Standards**:
+- **Max File Size**: Keep component files under 400 lines - split larger components unless it logically makes sense to keep them.
+- **Max Function Size**: Keep functions under 50 lines - extract smaller functions
+- **Dependency Management**: Minimize component dependencies - prefer prop drilling over complex context
+- **Error Boundaries**: Implement error boundaries for component isolation
+- **Type Safety**: Use PropTypes or TypeScript for prop validation in production code
+
 ## 3. Back-end Rules (Node.js & Express)
 
 **Centralized Error Handling**: For simple projects, basic error handling is acceptable. No need to implement a dedicated Express middleware for global error handling.
@@ -93,3 +121,20 @@ alwaysApply: true
 **Database**: Use simple Mongoose schemas without complex validation for testing. Add validation only when needed.
 
 **API Design**: Keep APIs simple - don't over-engineer with complex middleware unless necessary.
+
+**Backend Modularity Rules**:
+- **Route Separation**: Each feature should have its own route file (e.g., `authRoutes.js`, `userRoutes.js`)
+- **Controller Pattern**: Use controller functions to separate route logic from business logic
+- **Service Layer**: Create service files for complex business logic and database operations
+- **Middleware Organization**: Group related middleware in separate files
+- **Model Separation**: Each data model should be in its own file with clear schema definition
+- **Utility Functions**: Extract common database operations and business logic into utility files
+- **Configuration Management**: Centralize all configuration in dedicated config files
+- **Error Handling**: Create consistent error response utilities and use them across all routes
+
+**Code Organization Standards**:
+- **Feature-Based Structure**: Organize server code by features when the project grows beyond simple CRUD
+- **Dependency Injection**: Use dependency injection patterns for better testability
+- **Environment Separation**: Keep development, testing, and production configurations separate
+- **Database Connection**: Centralize database connection logic in a dedicated file
+- **Validation Layer**: Create reusable validation middleware for common data validation needs
