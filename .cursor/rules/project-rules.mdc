@@ -1,0 +1,77 @@
+---
+alwaysApply: true
+---
+
+# Project Rules for Simple but Maintainable MERN Applications
+
+## 1. General Rules
+
+**Tech Stack**: The project must be built using the MERN stack: MongoDB (with Mongoose), Express.js, React, and Node.js.
+
+**Project Structure**: The project must use a monorepo structure with two top-level directories: `client` for the React front-end and `server` for the Node.js/Express back-end.
+
+**Code Linting and Formatting**: Upon project creation, configure ESLint and Prettier for the entire project and use a standard style guide like Airbnb.
+
+**Modern JavaScript**: Use `const` and `let` for variable declarations. Never use `var`.
+
+**File Naming**: Use kebab-case for folders and utility files (e.g., `my-component.js`). React components can use either kebab-case or PascalCase (e.g., `UserProfile.js` is fine).
+
+**Naming Conventions**: All classes and React components must use PascalCase. All variables, functions, and properties must use camelCase.
+
+**DRY Principle**: Avoid code duplication. Extract common logic into reusable functions or components.
+
+**Single Responsibility Principle**: Each component, function, and module must have a single, well-defined purpose.
+
+**API Routes**: All API routes on the server must be prefixed with `/api/`.
+
+**Version Control**: Generate a `.gitignore` file and adhere to a standard for commit messages (e.g., Conventional Commits).
+
+**Development Speed**: Prioritize getting features working quickly over perfect architecture. Refactor later if needed.
+
+**Testing Focus**: Since this is for testing, focus on rapid prototyping. Use console.log for debugging, simple error messages, and minimal validation.
+
+## 2. Front-end Rules (React & UI)
+
+**UI Framework**: The front-end must use the Tailwind CSS utility-first framework for styling.
+
+**UI Primitives**: Use Headless UI for all complex UI primitives like modals, dialogs, and flyouts. Headless UI will manage functionality and accessibility, while Tailwind CSS will handle styling.
+
+**UI Components**: Leverage Headless UI's pre-built components (Dialog, Menu, Listbox, etc.) to build interfaces quickly without custom accessibility work.
+
+**Headless UI Usage**: 
+- Use `@headlessui/react` for all interactive components (modals, dropdowns, tabs)
+- Combine with Tailwind for instant styling
+- Leverage their accessibility features to focus on functionality
+
+**Tailwind Best Practices**:
+- Use Tailwind's built-in spacing/color system
+- Create simple component variants with conditional classes
+- Use `@apply` sparingly - prefer utility classes in JSX
+
+**Architecture**: For simple projects, a flat structure is acceptable. For larger projects, adopt a feature-based architecture organizing the `src` directory by feature (e.g., `features/auth`, `features/posts`).
+
+**Component Abstraction**: Prioritize creating reusable React components over using the `@apply` directive. For all reusable UI elements, use utility classes directly within that component's JSX.
+
+**Consistent Class Ordering**: Utility classes must be ordered to improve readability. The preferred order is: Layout, Sizing, Spacing, Typography, Backgrounds & Borders, and Interactivity/States.
+
+**Config-Driven Customization**: Avoid using arbitrary values in class names. All custom design tokens for colors, fonts, spacing, and breakpoints must be defined and extended within the `tailwind.config.js` file.
+
+**Error Handling**: For simple projects, basic try-catch in components is acceptable. For larger projects, isolate API calls within a dedicated API service layer to handle network-level errors gracefully.
+
+**State Management**: Use React's built-in state management (`useState`, `useContext`) unless a global state library is explicitly requested.
+
+## 3. Back-end Rules (Node.js & Express)
+
+**Centralized Error Handling**: For simple projects, basic error handling is acceptable. No need to implement a dedicated Express middleware for global error handling.
+
+**Informative Error Messages**: Return clear, helpful error messages from the API without exposing sensitive details.
+
+**Folder Structure**: The server directory should contain `src` as the main source folder, with sub-directories for models, routes, and controllers.
+
+**Environment Variables**: All sensitive information, such as the MongoDB connection string, must be stored in a `.env` file and accessed using the dotenv package.
+
+**RESTful Principles**: API routes should follow RESTful conventions (e.g., GET `/api/items` to get all items, POST `/api/items` to create an item).
+
+**Database**: Use simple Mongoose schemas without complex validation for testing. Add validation only when needed.
+
+**API Design**: Keep APIs simple - don't over-engineer with complex middleware unless necessary.
