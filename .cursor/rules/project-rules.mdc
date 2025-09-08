@@ -30,6 +30,8 @@ alwaysApply: true
 
 **Testing Focus**: Since this is for testing, focus on rapid prototyping. Use console.log for debugging, simple error messages, and minimal validation.
 
+**Feature Scope**: Only implement what is explicitly requested. Do not add extra features, buttons, or functionality unless specifically asked. Focus on the exact requirements and suggest improvements only when asked for guidance.
+
 ## 2. Front-end Rules (React & UI)
 
 **UI Framework**: The front-end must use the Tailwind CSS utility-first framework for styling.
@@ -77,6 +79,11 @@ alwaysApply: true
 - **Composable**: Build complex UIs by combining simple, focused components
 - **Consistent Props**: Use consistent prop naming and structure across similar components
 - **Default States**: Provide sensible defaults for all component props
+
+**Component Naming Convention**:
+- **Prefix Pattern**: Use descriptive prefixes for component groups to improve organization (e.g., `SettingsGeneral`, `SettingsOnboarding`, `AuthLogin`, `AuthRegister`, `UserProfile`, `UserDashboard`)
+- **Grouping**: Components with similar functionality should share a common prefix to group them alphabetically and make their purpose clear
+- **Consistency**: Follow this pattern for all component groups to maintain organization and discoverability across the entire codebase
 
 **Modular Architecture Rules**:
 - **Component Separation**: Never put multiple distinct UI features in a single component file

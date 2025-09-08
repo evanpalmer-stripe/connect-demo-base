@@ -3,4 +3,5 @@ export { default as MainContent } from './MainContent';
 export { default as ControlButton } from './ControlButton';
 export { default as ControlPanel } from './ControlPanel';
 export { default as SettingsSection } from './SettingsSection';
+export { default as SettingsGeneral } from './SettingsGeneral';
 export { default as DataDisplay } from './DataDisplay';

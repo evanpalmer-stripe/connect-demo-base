@@ -1,9 +1,13 @@
 import React from 'react';
 import { Tab } from '@headlessui/react';
+import SettingsGeneral from './SettingsGeneral';
 
 const SettingsSection = () => {
   const tabs = [
-    { name: 'General', content: 'General settings content goes here' },
+    { 
+      name: 'General', 
+      content: <SettingsGeneral />
+    },
     { name: 'Onboarding', content: 'Onboarding settings content goes here' },
     { name: 'Payment', content: 'Payment settings content goes here' },
     { name: 'Logs', content: 'Logs content goes here' }
@@ -41,7 +45,11 @@ const SettingsSection = () => {
             >
               <div className="text-gray-600">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">{tab.name} Settings</h3>
-                <p className="text-sm">{tab.content}</p>
+                {typeof tab.content === 'string' ? (
+                  <p className="text-sm">{tab.content}</p>
+                ) : (
+                  tab.content
+                )}
               </div>
             </Tab.Panel>
           ))}
