@@ -21,19 +21,7 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h3 className="text-xl font-medium text-gray-900 mb-2">
-          Stripe Connect Onboarding
-        </h3>
-        <p className="text-gray-600">
-          Current flow: <span className="font-medium text-gray-800">{onboarding.onboardingFlow}</span>
-        </p>
-        <p className="text-gray-500 text-sm mt-1">
-          Configure your onboarding flow using the control panel settings
-        </p>
-      </div>
-      
+    <div className="space-y-6">      
       {renderOnboardingFlow()}
     </div>
   );

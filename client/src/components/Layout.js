@@ -5,7 +5,7 @@ import { Header } from './index';
 const Layout = () => {
   return (
     <div className="container mx-auto px-4 py-16">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-full mx-auto">
         <Header />
         <main className="card card-padding-lg">
           <Outlet />
