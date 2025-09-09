@@ -42,12 +42,6 @@ const SettingsGeneral = () => {
           Your Stripe secret key (starts with sk_test_ or sk_live_)
         </p>
       </div>
-      
-      <div className="pt-4 border-t border-gray-200">
-        <button onClick={handleSave} className="btn btn-primary btn-md">
-          Save Settings
-        </button>
-      </div>
     </div>
   );
 };
