@@ -1,17 +1,31 @@
 import React from 'react';
 import { Tab } from '@headlessui/react';
 import SettingsGeneral from './SettingsGeneral';
+import SettingsOnboarding from './SettingsOnboarding';
+import { useUISettings } from '../contexts/SettingsContext';
 
 const SettingsSection = () => {
+  const { ui, updateUI } = useUISettings();
+  
   const tabs = [
     { 
       name: 'General', 
       content: <SettingsGeneral />
     },
-    { name: 'Onboarding', content: 'Onboarding settings content goes here' },
+    { 
+      name: 'Onboarding', 
+      content: <SettingsOnboarding />
+    },
     { name: 'Payment', content: 'Payment settings content goes here' },
     { name: 'Logs', content: 'Logs content goes here' }
   ];
+
+  const handleTabChange = (index) => {
+    updateUI({ activeTab: index });
+  };
+
+  // Fallback to 0 if ui or activeTab is undefined
+  const activeTab = ui?.activeTab ?? 0;
 
   return (
     <div>
@@ -19,7 +33,7 @@ const SettingsSection = () => {
         App Settings
       </label>
       
-      <Tab.Group>
+      <Tab.Group selectedIndex={activeTab} onChange={handleTabChange}>
         <Tab.List className="tab-list mb-6">
           {tabs.map((tab) => (
             <Tab

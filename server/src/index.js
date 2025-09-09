@@ -1,7 +1,9 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
+
+// Import database configuration (this will initialize SQLite)
+require('./config/database');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -13,24 +15,13 @@ app.use(express.json());
 // Debug environment variables
 console.log('Environment variables:');
 console.log('PORT:', process.env.PORT);
-console.log('MONGODB_URI:', process.env.MONGODB_URI);
 
-// MongoDB connection
-const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/mern-demo';
-console.log('Using MongoDB URI:', mongoUri);
-
-mongoose.connect(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('Connected to MongoDB successfully');
-})
-.catch((error) => {
-  console.error('MongoDB connection error:', error);
-});
+// Import routes
+const settingsRoutes = require('./routes/settingsRoutes');
 
 // Routes
+app.use('/api/settings', settingsRoutes);
+
 app.get('/api/data', (req, res) => {
   res.json({
     message: 'Hello from the MERN stack server!',

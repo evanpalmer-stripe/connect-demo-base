@@ -176,6 +176,10 @@
   @apply bg-red-100 text-red-800;
 }
 
+.badge-error {
+  @apply bg-red-100 text-red-800;
+}
+
 .badge-info {
   @apply bg-indigo-100 text-indigo-800;
 }
@@ -245,6 +249,122 @@
 
 .form-error {
   @apply text-sm text-red-600;
+}
+
+/* Radio Button Styles */
+.radio-group {
+  @apply space-y-2;
+}
+
+.radio-option {
+  @apply flex items-center cursor-pointer;
+}
+
+.radio-input {
+  @apply h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 focus:ring-2;
+}
+
+.radio-label {
+  @apply ml-2 text-sm text-gray-700;
+}
+
+/* Toggle Button Radio Styles */
+.toggle-group {
+  @apply flex space-x-1 p-1 bg-gray-100 rounded-lg;
+}
+
+.toggle-option {
+  @apply flex-1 px-4 py-2 text-sm font-medium text-center rounded-md cursor-pointer transition-all duration-200;
+}
+
+.toggle-option-unselected {
+  @apply text-gray-600 hover:text-gray-900 hover:bg-white;
+}
+
+.toggle-option-selected {
+  @apply bg-white text-blue-600 shadow-sm;
+}
+
+/* Card Selection Radio Styles */
+.card-group {
+  @apply grid gap-3;
+}
+
+.card-option {
+  @apply relative p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md;
+}
+
+.card-option-unselected {
+  @apply border-gray-200 bg-white hover:border-gray-300;
+}
+
+.card-option-selected {
+  @apply border-blue-500 bg-blue-50;
+}
+
+.card-option-input {
+  @apply absolute opacity-0 pointer-events-none;
+}
+
+.card-option-content {
+  @apply flex items-center justify-between;
+}
+
+.card-option-label {
+  @apply text-sm font-medium text-gray-900;
+}
+
+.card-option-description {
+  @apply text-xs text-gray-500 mt-1;
+}
+
+.card-option-indicator {
+  @apply w-5 h-5 rounded-full border-2 flex items-center justify-center;
+}
+
+.card-option-indicator-unselected {
+  @apply border-gray-300;
+}
+
+.card-option-indicator-selected {
+  @apply border-blue-500 bg-blue-500;
+}
+
+.card-option-indicator-dot {
+  @apply w-2 h-2 rounded-full bg-white;
+}
+
+/* Icon Radio Styles */
+.icon-radio-group {
+  @apply grid grid-cols-3 gap-3;
+}
+
+.icon-radio-option {
+  @apply relative p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 text-center hover:shadow-md;
+}
+
+.icon-radio-option-unselected {
+  @apply border-gray-200 bg-white hover:border-gray-300;
+}
+
+.icon-radio-option-selected {
+  @apply border-blue-500 bg-blue-50;
+}
+
+.icon-radio-input {
+  @apply absolute opacity-0 pointer-events-none;
+}
+
+.icon-radio-icon {
+  @apply w-8 h-8 mx-auto mb-2 text-gray-400;
+}
+
+.icon-radio-option-selected .icon-radio-icon {
+  @apply text-blue-600;
+}
+
+.icon-radio-label {
+  @apply text-sm font-medium text-gray-900;
 }
 
 /* Alert/Notification Styles */

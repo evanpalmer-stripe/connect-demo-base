@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Transition } from '@headlessui/react';
 import SettingsSection from './SettingsSection';
 

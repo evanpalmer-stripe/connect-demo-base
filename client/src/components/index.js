@@ -1,7 +1,17 @@
 export { default as Header } from './Header';
+export { default as Layout } from './Layout';
 export { default as MainContent } from './MainContent';
+export { default as HomePage } from './HomePage';
+export { default as Login } from './Login';
+export { default as Dashboard } from './Dashboard';
+export { default as Payments } from './Payments';
+export { default as Onboarding } from './Onboarding';
+export { default as OnboardingHosted } from './OnboardingHosted';
+export { default as OnboardingEmbedded } from './OnboardingEmbedded';
+export { default as OnboardingAPI } from './OnboardingAPI';
 export { default as ControlButton } from './ControlButton';
 export { default as ControlPanel } from './ControlPanel';
 export { default as SettingsSection } from './SettingsSection';
 export { default as SettingsGeneral } from './SettingsGeneral';
+export { default as SettingsOnboarding } from './SettingsOnboarding';
 export { default as DataDisplay } from './DataDisplay';

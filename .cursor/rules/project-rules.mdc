@@ -32,6 +32,16 @@ alwaysApply: true
 
 **Feature Scope**: Only implement what is explicitly requested. Do not add extra features, buttons, or functionality unless specifically asked. Focus on the exact requirements and suggest improvements only when asked for guidance.
 
+**Minimal Implementation Rule**: When asked to install packages or make simple changes, do ONLY what was requested. Do not create additional files, configurations, or implementations unless explicitly asked. For example:
+- If asked to "install stripe", only run the npm install commands
+- If asked to "add a button", only add the button, not styling, state management, or event handlers
+- If asked to "create a component", only create the basic component structure
+- Do not assume additional requirements or "helpful" extras
+
+**Agent Mode vs Ask Mode**: 
+- **Agent Mode**: Only propose code changes, file edits, or tool usage when explicitly in agent mode. This is when the user wants me to take action and make changes to the codebase.
+- **Ask Mode**: In ask mode, focus purely on conversation, explanation, and learning. Do not propose any code changes, file edits, or tool usage. Simply chat, explain concepts, and help the user understand things without making any modifications to the project.
+
 ## 2. Front-end Rules (React & UI)
 
 **UI Framework**: The front-end must use the Tailwind CSS utility-first framework for styling.
@@ -70,6 +80,18 @@ alwaysApply: true
 **Error Handling**: For simple projects, basic try-catch in components is acceptable. For larger projects, isolate API calls within a dedicated API service layer to handle network-level errors gracefully.
 
 **State Management**: Use React's built-in state management (`useState`, `useContext`) unless a global state library is explicitly requested.
+
+**Centralized Settings Management**: All control panel settings must be managed through the centralized Settings Context pattern:
+- **Context Pattern**: Use React Context with useReducer for all settings state management
+- **Provider Wrapper**: Wrap the entire app with SettingsProvider to make settings available globally
+- **Custom Hooks**: Use specific hooks (useGeneralSettings, useOnboardingSettings, etc.) instead of direct context access
+- **Automatic Persistence**: All settings must automatically persist to localStorage via the context
+- **No Local State**: Settings components must NOT use local useState for settings - always use context hooks
+- **Action Creators**: Use action creator functions (updateGeneral, updateOnboarding) instead of direct dispatch calls
+- **Immutable Updates**: Always use spread operators to create new state objects, never mutate existing state
+- **Error Boundaries**: Context must include proper error handling for localStorage operations
+- **Default Values**: Provide sensible default values for all settings in the initial state
+- **Type Safety**: Use consistent action types and payload structures for all setting updates
 
 **Design Principles**:
 - **Clean & Minimal**: Prioritize clean, uncluttered interfaces with plenty of white space
@@ -121,6 +143,41 @@ alwaysApply: true
 - **Dependency Management**: Minimize component dependencies - prefer prop drilling over complex context
 - **Error Boundaries**: Implement error boundaries for component isolation
 - **Type Safety**: Use PropTypes or TypeScript for prop validation in production code
+
+**React Router and Layout Standards**:
+- **Layout Route Pattern**: Always use React Router's nested route pattern with Layout components and `<Outlet />`
+- **Shared Layout**: All pages must use the same Layout component for consistent header, container, and card styling
+- **No Full-Screen Layouts**: Page components must NOT use `min-h-screen`, `flex`, `items-center`, or `justify-center` - these are handled by the Layout
+- **Consistent Spacing**: Use `space-y-6` for main content containers to match existing pages
+- **Typography Consistency**: Use `text-xl font-medium` for page headings to match the established pattern
+- **Route Structure**: All routes must be nested under a parent Layout route using the pattern:
+  ```jsx
+  <Route path="/" element={<Layout />}>
+    <Route index element={<HomePage />} />
+    <Route path="new-page" element={<NewPage />} />
+  </Route>
+  ```
+- **Page Component Structure**: All page components must follow this structure:
+  ```jsx
+  const PageName = () => {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h2 className="text-xl font-medium text-gray-900 mb-2">
+            Page Title
+          </h2>
+          <p className="text-gray-600">
+            Page description
+          </p>
+        </div>
+        {/* Page content */}
+      </div>
+    );
+  };
+  ```
+- **Navigation Links**: Use React Router's `Link` component for all internal navigation
+- **Catch-All Routes**: Always include a catch-all route (`path="*"`) that redirects to the homepage
+- **Layout Component**: The Layout component must handle all shared UI elements (header, container, card wrapper) and use `<Outlet />` for child route content
 
 ## 3. Back-end Rules (Node.js & Express)
 

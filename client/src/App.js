@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Header, MainContent, ControlButton, ControlPanel } from './components';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Layout, HomePage, Login, Dashboard, Payments, Onboarding, ControlButton, ControlPanel } from './components';
+import { SettingsProvider } from './contexts';
 
 function App() {
   const [isControlPanelOpen, setIsControlPanelOpen] = useState(false);
@@ -8,17 +10,25 @@ function App() {
   const handleCloseControlPanel = () => setIsControlPanelOpen(false);
 
   return (
-    <div className="min-h-screen bg-white relative">
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-3xl mx-auto">
-          <Header />
-          <MainContent />
-        </div>
-      </div>
+    <SettingsProvider>
+      <Router>
+        <div className="min-h-screen bg-white relative">
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<HomePage />} />
+              <Route path="login" element={<Login />} />
+              <Route path="onboarding" element={<Onboarding />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="payments" element={<Payments />} />
+              <Route path="*" element={<HomePage />} />
+            </Route>
+          </Routes>
 
-      <ControlButton onClick={handleOpenControlPanel} />
-      <ControlPanel isOpen={isControlPanelOpen} onClose={handleCloseControlPanel} />
-    </div>
+          <ControlButton onClick={handleOpenControlPanel} />
+          <ControlPanel isOpen={isControlPanelOpen} onClose={handleCloseControlPanel} />
+        </div>
+      </Router>
+    </SettingsProvider>
   );
 }
 
