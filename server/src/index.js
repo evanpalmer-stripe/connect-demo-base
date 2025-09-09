@@ -18,9 +18,11 @@ console.log('PORT:', process.env.PORT);
 
 // Import routes
 const settingsRoutes = require('./routes/settingsRoutes');
+const onboardingRoutes = require('./routes/onboardingRoutes');
 
 // Routes
 app.use('/api/settings', settingsRoutes);
+app.use('/api/onboarding', onboardingRoutes);
 
 app.get('/api/data', (req, res) => {
   res.json({

@@ -6,17 +6,17 @@ const SettingsOnboarding = () => {
 
   const accountTypeOptions = [
     { 
-      value: 'Standard', 
+      value: 'standard', 
       label: 'Standard',
       description: 'Full-featured account with complete customization'
     },
     { 
-      value: 'Express', 
+      value: 'express', 
       label: 'Express',
       description: 'Quick setup with streamlined onboarding'
     },
     { 
-      value: 'Custom', 
+      value: 'custom', 
       label: 'Custom',
       description: 'Tailored experience for your specific needs'
     }
@@ -42,8 +42,8 @@ const SettingsOnboarding = () => {
 
 
   return (
-    <div className="space-y-8">
-      {/* Account Type - Card Selection Style */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Account Type - Left Column */}
       <div className="form-group">
         <label className="form-label">
           Account Type
@@ -76,7 +76,7 @@ const SettingsOnboarding = () => {
         </p>
       </div>
       
-      {/* Onboarding Flow - Card Selection Style */}
+      {/* Onboarding Flow - Right Column */}
       <div className="form-group">
         <label className="form-label">
           Onboarding Flow
@@ -108,7 +108,6 @@ const SettingsOnboarding = () => {
           Choose how the onboarding process will be presented to users
         </p>
       </div>
-
     </div>
   );
 };
