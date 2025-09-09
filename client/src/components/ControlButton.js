@@ -4,7 +4,7 @@ const ControlButton = ({ onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="fixed bottom-6 right-6 w-12 h-12 bg-gray-800 hover:bg-gray-700 text-white rounded-full flex items-center justify-center shadow-lg transition-colors duration-200 z-40"
+      className="fixed bottom-6 right-6 w-12 h-12 btn btn-secondary rounded-full flex items-center justify-center shadow-lg z-40"
       aria-label="Open control panel"
     >
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

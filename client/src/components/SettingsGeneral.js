@@ -11,8 +11,8 @@ const SettingsGeneral = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div className="form-group">
+        <label className="form-label">
           Publishable Key
         </label>
         <input
@@ -22,13 +22,13 @@ const SettingsGeneral = () => {
           placeholder="pk_test_..."
           className="input"
         />
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="form-help">
           Your Stripe publishable key (starts with pk_test_ or pk_live_)
         </p>
       </div>
       
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div className="form-group">
+        <label className="form-label">
           Secret Key
         </label>
         <input
@@ -38,9 +38,15 @@ const SettingsGeneral = () => {
           placeholder="sk_test_..."
           className="input"
         />
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="form-help">
           Your Stripe secret key (starts with sk_test_ or sk_live_)
         </p>
+      </div>
+      
+      <div className="pt-4 border-t border-gray-200">
+        <button onClick={handleSave} className="btn btn-primary btn-md">
+          Save Settings
+        </button>
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ const SettingsSection = () => {
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-4">
+      <label className="form-label mb-4">
         App Settings
       </label>
       
