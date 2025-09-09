@@ -20,16 +20,12 @@ const SettingsSection = () => {
       </label>
       
       <Tab.Group>
-        <Tab.List className="flex space-x-1 rounded-xl 20 p-1 mb-6">
+        <Tab.List className="tab-list mb-6">
           {tabs.map((tab) => (
             <Tab
               key={tab.name}
               className={({ selected }) =>
-                `w-full rounded-lg py-2.5 text-sm font-medium leading-5 transition-colors ${
-                  selected
-                    ? 'bg-blue-600 text-white shadow'
-                    : 'bg-white text-gray-400 border border-gray-200 hover:bg-white hover:text-gray-600 hover:border-gray-600'
-                }`
+                `tab ${selected ? 'tab-selected' : 'tab-unselected'}`
               }
             >
               {tab.name}
@@ -39,10 +35,7 @@ const SettingsSection = () => {
         
         <Tab.Panels className="mt-2">
           {tabs.map((tab, idx) => (
-            <Tab.Panel
-              key={idx}
-              className="rounded-xl bg-white p-6 shadow-sm border border-gray-200"
-            >
+            <Tab.Panel key={idx} className="tab-panel">
               <div className="text-gray-600">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">{tab.name} Settings</h3>
                 {typeof tab.content === 'string' ? (

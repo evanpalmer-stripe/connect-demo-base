@@ -50,9 +50,18 @@ alwaysApply: true
 - Create simple component variants with conditional classes
 - Use `@apply` sparingly - prefer utility classes in JSX
 
+**CSS Utility Classes Approach**:
+- **Centralized Styling**: All reusable element styles must be defined in `src/styles/components.css` using Tailwind's `@apply` directive
+- **Semantic Classes**: Use semantic class names instead of repeating Tailwind utilities across components
+- **Variant System**: Create modifier classes for variants (e.g., `-primary`, `-danger`, `-success`, `-error`)
+- **Size Modifiers**: Use size classes for consistent sizing (e.g., `-sm`, `-md`, `-lg`)
+- **No Heavy Components**: Avoid creating React components for simple styling - use CSS classes instead
+- **Class Composition**: Combine base classes with modifiers (e.g., `className="element element-primary element-md"`)
+- **Consistent Naming**: Follow the pattern: `element` for base styles, `element-variant` for variants, `element-size` for sizes
+
 **Architecture**: For simple projects, a flat structure is acceptable. For larger projects, adopt a feature-based architecture organizing the `src` directory by feature (e.g., `features/auth`, `features/posts`).
 
-**Component Abstraction**: Prioritize creating reusable React components over using the `@apply` directive. For all reusable UI elements, use utility classes directly within that component's JSX.
+**Component Abstraction**: For styling, prioritize CSS utility classes over React components. Only create React components for complex interactive behavior, not for simple styling patterns.
 
 **Consistent Class Ordering**: Utility classes must be ordered to improve readability. The preferred order is: Layout, Sizing, Spacing, Typography, Backgrounds & Borders, and Interactivity/States.
 
@@ -103,7 +112,7 @@ alwaysApply: true
 - **Prop Interface**: Every reusable component must have a clear, documented prop interface
 - **Default Props**: Provide sensible defaults for all optional props
 - **Composition over Configuration**: Prefer composition patterns over complex prop configurations
-- **Generic Components**: Create generic base components (Button, Input, Card) that can be styled via props
+- **Generic Components**: Avoid creating generic styling components (Button, Input, Card) - use CSS utility classes instead for better performance and simplicity
 - **Hook Extraction**: Extract complex component logic into custom hooks for reusability
 
 **Maintainability Standards**:
