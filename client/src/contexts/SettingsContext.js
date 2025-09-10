@@ -6,6 +6,7 @@ const initialSettings = {
     publishableKey: '',
     secretKey: '',
     isVerified: false,
+    connectedAccountCountry: 'AU',
   },
   onboarding: {
     accountType: 'Standard',
