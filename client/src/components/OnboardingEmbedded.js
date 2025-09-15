@@ -1,16 +1,14 @@
 import React from 'react';
 import { useState, useEffect, useRef } from "react";
 import { loadConnectAndInitialize } from "@stripe/connect-js";
-import {
-  ConnectAccountOnboarding,
-  ConnectComponentsProvider,
-} from "@stripe/react-connect-js";
+import { ConnectAccountOnboarding, ConnectComponentsProvider } from "@stripe/react-connect-js";
 import { useGeneralSettings } from '../contexts/SettingsContext';
 
 export const useStripeConnect = () => {
   const [stripeConnectInstance, setStripeConnectInstance] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [clientSecret, setClientSecret] = useState(null);
   const { general } = useGeneralSettings();
   const isInitialized = useRef(false);
 
@@ -22,9 +20,6 @@ export const useStripeConnect = () => {
 
     const fetchClientSecret = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-        
         const response = await fetch("/api/onboarding/embedded", {
           method: "GET",
           headers: {
@@ -42,40 +37,42 @@ export const useStripeConnect = () => {
         return clientSecret;
       } catch (err) {
         console.error('Error fetching client secret:', err);
-        setError(err.message);
         throw err;
-      } finally {
-        setIsLoading(false);
       }
     };
 
     isInitialized.current = true;
     
     try {
-      setStripeConnectInstance(
-        loadConnectAndInitialize({
-          publishableKey: general.publishableKey,
-          fetchClientSecret,
-          appearance: {
-            overlays: "dialog",
-            variables: {
-              colorPrimary: "#635BFF",
-            },
+      setIsLoading(true);
+      setError(null);
+      
+      // Initialize Stripe Connect JS - this returns the instance directly, not a Promise
+      const connectInstance = loadConnectAndInitialize({
+        publishableKey: general.publishableKey,
+        fetchClientSecret: fetchClientSecret,
+        appearance: {
+          variables: {
+            colorPrimary: '#625afa',
           },
-        })
-      );
+        },
+      });
+      
+      setStripeConnectInstance(connectInstance);
+      setIsLoading(false);
     } catch (err) {
       console.error('Failed to initialize Stripe Connect:', err);
       setError(err.message);
+      setIsLoading(false);
     }
   }, [general.publishableKey]);
 
-  return { stripeConnectInstance, isLoading, error };
+  return { stripeConnectInstance, isLoading, error, clientSecret };
 };
 
 const OnboardingEmbedded = () => {
   const [onboardingExited, setOnboardingExited] = useState(false);
-  const { stripeConnectInstance, isLoading, error } = useStripeConnect();
+  const { stripeConnectInstance, isLoading, error, clientSecret } = useStripeConnect();
   const { general } = useGeneralSettings();
 
   console.log('Client - Publishable Key being used:', general.publishableKey ? `${general.publishableKey.substring(0, 10)}...` : 'NOT SET');
@@ -111,38 +108,55 @@ const OnboardingEmbedded = () => {
     );
   }
 
+  if (!stripeConnectInstance) {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+        <div className="text-center">
+          <div className="text-yellow-600 font-medium mb-2">
+            ⏳ Initializing Stripe Connect
+          </div>
+          <div className="text-gray-600">Setting up the Connect instance...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-      <div className="text-center">
+      <div className="text-center mb-4">
         <div className="text-green-600 font-medium mb-2">
           🎯 Embedded Onboarding Flow
         </div>
-        <div className="text-green-800 text-sm mb-3">
-          Embed Stripe components directly in your application
-        </div>
-        <div className="text-green-600 text-xs">
-          This flow will embed Stripe's onboarding components within your app
-        </div>
+      </div>
 
-        <div className="content">
-          {stripeConnectInstance && (
-            <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
-              <ConnectAccountOnboarding
-                onExit={() => setOnboardingExited(true)}
-              />
-            </ConnectComponentsProvider>
-          )}
-          {onboardingExited && (
-            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-blue-800">The Account Onboarding component has exited</p>
-            </div>
-          )}
-          <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <p className="text-gray-700 text-sm">
-              This is a sample app for Connect onboarding using the Account Onboarding embedded component. <a href="https://docs.stripe.com/connect/onboarding/quickstart?connect-onboarding-surface=embedded" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 underline">View docs</a>
-            </p>
-          </div>
-        </div>
+      <div className="onboarding-container" style={{ 
+        position: 'relative', 
+        zIndex: 1,
+        minHeight: '400px',
+        width: '100%'
+      }}>
+        <ConnectComponentsProvider 
+          connectInstance={stripeConnectInstance}
+        >
+          <ConnectAccountOnboarding
+            onExit={() => {
+              console.log("The account has exited onboarding");
+              setOnboardingExited(true);
+            }}
+            // Optional: make sure to follow our policy instructions above
+            // fullTermsOfServiceUrl="{{URL}}"
+            // recipientTermsOfServiceUrl="{{URL}}"
+            // privacyPolicyUrl="{{URL}}"
+            // skipTermsOfServiceCollection={false}
+            // collectionOptions={{
+            //   fields: 'eventually_due',
+            //   futureRequirements: 'include',
+            // }}
+            // onStepChange={(stepChange) => {
+            //   console.log(`User entered: ${stepChange.step}`);
+            // }}
+          />
+        </ConnectComponentsProvider>
       </div>
     </div>
   );
