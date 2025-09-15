@@ -8,12 +8,10 @@ export const useStripeConnect = () => {
   const [stripeConnectInstance, setStripeConnectInstance] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [clientSecret, setClientSecret] = useState(null);
   const { general } = useGeneralSettings();
   const isInitialized = useRef(false);
 
   useEffect(() => { 
-    // Prevent multiple initializations using useRef
     if (isInitialized.current || !general.publishableKey) {
       return;
     }
@@ -47,7 +45,7 @@ export const useStripeConnect = () => {
       setIsLoading(true);
       setError(null);
       
-      // Initialize Stripe Connect JS - this returns the instance directly, not a Promise
+      // Initialize Stripe Connect JS - it will handle client secret fetching internally
       const connectInstance = loadConnectAndInitialize({
         publishableKey: general.publishableKey,
         fetchClientSecret: fetchClientSecret,
@@ -58,6 +56,7 @@ export const useStripeConnect = () => {
         },
       });
       
+      // The instance is ready immediately, but the client secret will be fetched when needed
       setStripeConnectInstance(connectInstance);
       setIsLoading(false);
     } catch (err) {
@@ -67,12 +66,12 @@ export const useStripeConnect = () => {
     }
   }, [general.publishableKey]);
 
-  return { stripeConnectInstance, isLoading, error, clientSecret };
+  return { stripeConnectInstance, isLoading, error };
 };
 
 const OnboardingEmbedded = () => {
   const [onboardingExited, setOnboardingExited] = useState(false);
-  const { stripeConnectInstance, isLoading, error, clientSecret } = useStripeConnect();
+  const { stripeConnectInstance, isLoading, error } = useStripeConnect();
   const { general } = useGeneralSettings();
 
   console.log('Client - Publishable Key being used:', general.publishableKey ? `${general.publishableKey.substring(0, 10)}...` : 'NOT SET');
