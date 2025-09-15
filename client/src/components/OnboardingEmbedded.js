@@ -1,5 +1,5 @@
 import React from 'react';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { loadConnectAndInitialize } from "@stripe/connect-js";
 import {
   ConnectAccountOnboarding,
@@ -10,8 +10,14 @@ import { useGeneralSettings } from '../contexts/SettingsContext';
 export const useStripeConnect = () => {
   const [stripeConnectInstance, setStripeConnectInstance] = useState();
   const { general } = useGeneralSettings();
+  const isInitialized = useRef(false);
 
   useEffect(() => { 
+    // Prevent multiple initializations using useRef
+    if (isInitialized.current) {
+      return;
+    }
+
     const fetchClientSecret = async () => {
       const response = await fetch("/api/onboarding/embedded", {
         method: "GET",
@@ -30,6 +36,7 @@ export const useStripeConnect = () => {
       }
     };
 
+    isInitialized.current = true;
     setStripeConnectInstance(
       loadConnectAndInitialize({
         publishableKey: general.publishableKey,

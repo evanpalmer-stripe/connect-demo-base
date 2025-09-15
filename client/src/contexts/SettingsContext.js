@@ -32,6 +32,8 @@ const SETTINGS_ACTIONS = {
   UPDATE_UI: 'UPDATE_UI',
   RESET_SETTINGS: 'RESET_SETTINGS',
   LOAD_SETTINGS: 'LOAD_SETTINGS',
+  SET_LOADING: 'SET_LOADING',
+  SET_ERROR: 'SET_ERROR',
 };
 
 // Settings reducer
@@ -63,18 +65,23 @@ const settingsReducer = (state, action) => {
         ui: { ...state.ui, ...action.payload }
       };
     case SETTINGS_ACTIONS.RESET_SETTINGS:
-      return initialSettings;
+      return { ...initialSettings, isLoading: false, error: null };
     case SETTINGS_ACTIONS.LOAD_SETTINGS:
       return {
         ...initialSettings,
-        ...action.payload,
-        // Ensure nested objects are properly merged
-        general: { ...initialSettings.general, ...action.payload.general },
-        onboarding: { ...initialSettings.onboarding, ...action.payload.onboarding },
-        payment: { ...initialSettings.payment, ...action.payload.payment },
-        logs: { ...initialSettings.logs, ...action.payload.logs },
-        ui: { ...initialSettings.ui, ...action.payload.ui },
+        // Deep merge with proper fallbacks - only merge if payload has data
+        general: { ...initialSettings.general, ...(action.payload.general || {}) },
+        onboarding: { ...initialSettings.onboarding, ...(action.payload.onboarding || {}) },
+        payment: { ...initialSettings.payment, ...(action.payload.payment || {}) },
+        logs: { ...initialSettings.logs, ...(action.payload.logs || {}) },
+        ui: { ...initialSettings.ui, ...(action.payload.ui || {}) },
+        isLoading: false,
+        error: null,
       };
+    case SETTINGS_ACTIONS.SET_LOADING:
+      return { ...state, isLoading: action.payload };
+    case SETTINGS_ACTIONS.SET_ERROR:
+      return { ...state, error: action.payload, isLoading: false };
     default:
       return state;
   }
@@ -85,19 +92,31 @@ const SettingsContext = createContext();
 
 // Settings Provider component
 export const SettingsProvider = ({ children }) => {
-  const [settings, dispatch] = useReducer(settingsReducer, initialSettings);
+  const [settings, dispatch] = useReducer(settingsReducer, { ...initialSettings, isLoading: true, error: null });
   const [isInitialized, setIsInitialized] = useState(false);
+  const [saveTimeoutId, setSaveTimeoutId] = useState(null);
 
   // Load settings from server database and localStorage on mount
   useEffect(() => {
     const loadSettings = async () => {
       try {
+        dispatch({ type: SETTINGS_ACTIONS.SET_LOADING, payload: true });
+        
         // First, try to load from server database
         const response = await fetch('/api/settings');
         if (response.ok) {
           const serverSettings = await response.json();
-          // Only use server settings if they exist and have meaningful data
-          if (serverSettings && (serverSettings.general?.publishableKey || serverSettings.onboarding?.onboardingFlow)) {
+          
+          // Check if server settings contain meaningful data (not just empty objects)
+          const hasData = serverSettings && (
+            (serverSettings.general && Object.keys(serverSettings.general).length > 0) ||
+            (serverSettings.onboarding && Object.keys(serverSettings.onboarding).length > 0) ||
+            (serverSettings.payment && Object.keys(serverSettings.payment).length > 0) ||
+            (serverSettings.logs && Object.keys(serverSettings.logs).length > 0) ||
+            (serverSettings.ui && Object.keys(serverSettings.ui).length > 0)
+          );
+          
+          if (hasData) {
             dispatch({ type: SETTINGS_ACTIONS.LOAD_SETTINGS, payload: serverSettings });
             setIsInitialized(true);
             return;
@@ -112,7 +131,11 @@ export const SettingsProvider = ({ children }) => {
             dispatch({ type: SETTINGS_ACTIONS.LOAD_SETTINGS, payload: parsedSettings });
           } catch (error) {
             console.error('Failed to load settings from localStorage:', error);
+            dispatch({ type: SETTINGS_ACTIONS.SET_ERROR, payload: 'Failed to load settings from localStorage' });
           }
+        } else {
+          // Use defaults if no saved settings exist
+          dispatch({ type: SETTINGS_ACTIONS.LOAD_SETTINGS, payload: {} });
         }
       } catch (error) {
         console.error('Failed to load settings from server:', error);
@@ -125,7 +148,11 @@ export const SettingsProvider = ({ children }) => {
             dispatch({ type: SETTINGS_ACTIONS.LOAD_SETTINGS, payload: parsedSettings });
           } catch (error) {
             console.error('Failed to load settings from localStorage:', error);
+            dispatch({ type: SETTINGS_ACTIONS.SET_ERROR, payload: 'Failed to load settings from localStorage' });
           }
+        } else {
+          // Use defaults if no saved settings exist
+          dispatch({ type: SETTINGS_ACTIONS.LOAD_SETTINGS, payload: {} });
         }
       }
       setIsInitialized(true);
@@ -136,35 +163,75 @@ export const SettingsProvider = ({ children }) => {
 
   // Save settings to localStorage (but not during initial load)
   useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem('stripe-connect-settings', JSON.stringify(settings));
+    if (isInitialized && !settings.isLoading) {
+      localStorage.setItem('stripe-connect-settings', JSON.stringify({
+        general: settings.general,
+        onboarding: settings.onboarding,
+        payment: settings.payment,
+        logs: settings.logs,
+        ui: settings.ui,
+      }));
     }
   }, [settings, isInitialized]);
 
-  // Auto-save to database with debounce to prevent excessive calls
+  // Auto-save to database with proper debounce
   useEffect(() => {
+    if (!isInitialized || settings.isLoading) {
+      return; // Don't save during initialization
+    }
+
     const saveToDatabase = async () => {
       try {
-        await fetch('/api/settings', {
+        const response = await fetch('/api/settings', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            settings: settings,
+            settings: {
+              general: settings.general,
+              onboarding: settings.onboarding,
+              payment: settings.payment,
+              logs: settings.logs,
+              ui: settings.ui,
+            },
             userId: 'default'
           }),
         });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
       } catch (error) {
         console.error('Failed to save settings to database:', error);
+        // Could dispatch an error action here to show user notification
       }
     };
 
-    // Debounce database saves by 500ms to prevent excessive API calls
-    const timeoutId = setTimeout(saveToDatabase, 500);
+    // Clear existing timeout
+    if (saveTimeoutId) {
+      clearTimeout(saveTimeoutId);
+    }
+
+    // Set new timeout
+    const newTimeoutId = setTimeout(saveToDatabase, 1000); // Increased to 1 second
+    setSaveTimeoutId(newTimeoutId);
     
-    return () => clearTimeout(timeoutId);
-  }, [settings]);
+    return () => {
+      if (newTimeoutId) {
+        clearTimeout(newTimeoutId);
+      }
+    };
+  }, [settings.general, settings.onboarding, settings.payment, settings.logs, settings.ui, isInitialized, settings.isLoading]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutId) {
+        clearTimeout(saveTimeoutId);
+      }
+    };
+  }, [saveTimeoutId]);
 
   // Action creators
   const updateGeneral = useCallback((updates) => {
