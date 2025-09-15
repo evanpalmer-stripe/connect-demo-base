@@ -66,9 +66,10 @@ router.get('/embedded', async (req, res) => {
       // },
     }); 
 
+    console.log(`Created account: ${account.id}`);
+
     const accountSession = await stripe.accountSessions.create({
       account: account.id, 
-
       components: {
         account_management: {
           enabled: true,  // true | false 
@@ -91,19 +92,32 @@ router.get('/embedded', async (req, res) => {
       },
     });
 
+    console.log(`Created account session for account: ${account.id}`);
+
     res.json({
       client_secret: accountSession.client_secret,
       account: accountSession.account,
     });
 
   } catch (error) {
-    // TODO - better error message
-    console.error('Failed to generate emebeded onboarding:', error);
+    console.error('Failed to generate embedded onboarding:', error);
+    
+    // Provide more specific error messages based on the error type
+    let errorMessage = 'Failed to generate embedded onboarding';
+    
+    if (error.type === 'StripeAuthenticationError') {
+      errorMessage = 'Invalid Stripe API keys. Please check your secret key in settings.';
+    } else if (error.type === 'StripeInvalidRequestError') {
+      errorMessage = 'Invalid request to Stripe. Please check your account type settings.';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
     res.status(500).json({
       success: false,
-      error: 'Failed to generate emebeded onboarding'
+      error: errorMessage
     });
   }
-  });
+});
 
 module.exports = router;
