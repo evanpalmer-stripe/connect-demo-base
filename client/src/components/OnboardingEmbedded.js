@@ -4,7 +4,7 @@ import { loadConnectAndInitialize } from "@stripe/connect-js";
 import { ConnectAccountOnboarding, ConnectComponentsProvider } from "@stripe/react-connect-js";
 import { useGeneralSettings } from '../contexts/SettingsContext';
 
-export const useStripeConnect = () => {
+export const useStripeConnect = (accountId) => {
   const [stripeConnectInstance, setStripeConnectInstance] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -12,13 +12,13 @@ export const useStripeConnect = () => {
   const isInitialized = useRef(false);
 
   useEffect(() => { 
-    if (isInitialized.current || !general.publishableKey) {
+    if (isInitialized.current || !general.publishableKey || !accountId) {
       return;
     }
 
     const fetchClientSecret = async () => {
       try {
-        const response = await fetch("/api/onboarding/embedded", {
+        const response = await fetch(`/api/onboarding/embedded?account_id=${accountId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -64,7 +64,7 @@ export const useStripeConnect = () => {
       setError(err.message);
       setIsLoading(false);
     }
-  }, [general.publishableKey]);
+  }, [general.publishableKey, accountId]);
 
   return { stripeConnectInstance, isLoading, error };
 };
@@ -74,7 +74,8 @@ const OnboardingEmbedded = () => {
   const [email, setEmail] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [emailError, setEmailError] = useState('');
-  const { stripeConnectInstance, isLoading, error } = useStripeConnect();
+  const [accountId, setAccountId] = useState(null);
+  const { stripeConnectInstance, isLoading, error } = useStripeConnect(accountId);
   const { general } = useGeneralSettings();
 
   const validateEmail = (email) => {
@@ -82,8 +83,8 @@ const OnboardingEmbedded = () => {
     return emailRegex.test(email);
   };
 
-  const handleEmailSubmit = (e) => {
-    e.preventDefault();
+  const handleEmailSubmit = async (e) => {
+      e.preventDefault();
     setEmailError('');
     
     if (!email.trim()) {
@@ -95,11 +96,30 @@ const OnboardingEmbedded = () => {
       setEmailError('Please enter a valid email address');
       return;
     }
-    
-    setEmailSubmitted(true);
-  };
 
-  console.log('Client - Publishable Key being used:', general.publishableKey ? `${general.publishableKey.substring(0, 10)}...` : 'NOT SET');
+    try {
+      const response = await fetch('/api/onboarding/create-account-with-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        setEmailError(errorData.error || 'Failed to create account');
+        return;
+      }
+      
+      const data = await response.json();
+      setAccountId(data.id);
+      setEmailSubmitted(true);
+    } catch (error) {
+      console.error('Error creating account:', error);
+      setEmailError('Failed to create account. Please try again.');
+    }
+  };
 
   // Show email collection form if email hasn't been submitted yet
   if (!emailSubmitted) {

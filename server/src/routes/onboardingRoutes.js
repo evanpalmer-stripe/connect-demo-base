@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Settings = require('../models/Settings');
-
+const User = require('../models/User');
 
 
 // GET /api/onboarding/hosted - Returns test redirect URL
@@ -40,36 +40,71 @@ router.get('/hosted', async (req, res) => {
   }
 });
 
+router.post('/create-account-with-email', async (req, res) => {
+  const settings = Settings.getSettings("default");
+
+  const email = req.body.email;
+  let user = User.getUserByEmail(email);
+
+  if(user) {
+    return res.json({
+      success: true,
+      id: user.accountId,
+      email: user.email,
+    });
+  }
+
+  const stripe = require("stripe")(
+    settings.general.secretKey
+  ); 
+  
+  // Create an empty account
+  const account = await stripe.accounts.create({
+    type: settings.onboarding.accountType,
+    country: settings.onboarding.country,
+    email: email,
+    // controller: {
+    //   stripe_dashboard: { // TODO: add dashboard type to the settings
+    //     type: settings.onboarding.dashboardType,
+    //   },
+    //   fees: {
+    //     payer: "application"
+    //   },
+    //   losses: {
+    //     payments: "application"
+    //   },
+    // },
+  }); 
+
+  console.log(`Created account: ${account.id}`);
+
+  // Save user to database
+  try {
+    const user = User.createUser(req.body.email, account.id);
+    console.log(`Saved user to database: ${user.id}`);
+    return res.json({
+      success: true,
+      id: user.accountId,
+      email: user.email,
+    });
+  } catch (dbError) {
+    console.error('Error saving user to database:', dbError);
+    throw dbError;
+  }
+});
+
 // TODO: Should this be a POST?
 router.get('/embedded', async (req, res) => {
   try {
     const settings = Settings.getSettings("default");
-
     const stripe = require("stripe")(
       settings.general.secretKey
     ); 
-
-    // Create an empty account
-    const account = await stripe.accounts.create({
-      type: settings.onboarding.accountType,
-      country: 'AU',
-      // controller: {
-      //   stripe_dashboard: { // TODO: add dashboard type to the settings
-      //     type: settings.onboarding.dashboardType,
-      //   },
-      //   fees: {
-      //     payer: "application"
-      //   },
-      //   losses: {
-      //     payments: "application"
-      //   },
-      // },
-    }); 
-
-    console.log(`Created account: ${account.id}`);
-
+    
+    let accountId = req.query.account_id;
+    
     const accountSession = await stripe.accountSessions.create({
-      account: account.id, 
+      account: accountId, 
       components: {
         account_management: {
           enabled: true,  // true | false 
@@ -92,7 +127,7 @@ router.get('/embedded', async (req, res) => {
       },
     });
 
-    console.log(`Created account session for account: ${account.id}`);
+    console.log(`Created account session for account: ${accountId}`);
 
     res.json({
       client_secret: accountSession.client_secret,

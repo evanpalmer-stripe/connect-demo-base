@@ -20,6 +20,16 @@ db.pragma('foreign_keys = ON');
 // Create tables
 const initDatabase = () => {
   try {
+    // Users table
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        account_id TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Settings table
     db.exec(`
       CREATE TABLE IF NOT EXISTS settings (
