@@ -9,8 +9,8 @@ const initialSettings = {
     connectedAccountCountry: 'AU',
   },
   onboarding: {
-    accountType: 'Standard',
-    onboardingFlow: 'Hosted',
+    accountType: 'standard',
+    onboardingFlow: 'hosted',
   },
   payment: {
     // Add payment settings here when needed
@@ -88,18 +88,50 @@ export const SettingsProvider = ({ children }) => {
   const [settings, dispatch] = useReducer(settingsReducer, initialSettings);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Load settings from localStorage on mount
+  // Load settings from server database and localStorage on mount
   useEffect(() => {
-    const savedSettings = localStorage.getItem('stripe-connect-settings');
-    if (savedSettings) {
+    const loadSettings = async () => {
       try {
-        const parsedSettings = JSON.parse(savedSettings);
-        dispatch({ type: SETTINGS_ACTIONS.LOAD_SETTINGS, payload: parsedSettings });
+        // First, try to load from server database
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+          const serverSettings = await response.json();
+          // Only use server settings if they exist and have meaningful data
+          if (serverSettings && (serverSettings.general?.publishableKey || serverSettings.onboarding?.onboardingFlow)) {
+            dispatch({ type: SETTINGS_ACTIONS.LOAD_SETTINGS, payload: serverSettings });
+            setIsInitialized(true);
+            return;
+          }
+        }
+        
+        // Fallback to localStorage if server settings are empty
+        const savedSettings = localStorage.getItem('stripe-connect-settings');
+        if (savedSettings) {
+          try {
+            const parsedSettings = JSON.parse(savedSettings);
+            dispatch({ type: SETTINGS_ACTIONS.LOAD_SETTINGS, payload: parsedSettings });
+          } catch (error) {
+            console.error('Failed to load settings from localStorage:', error);
+          }
+        }
       } catch (error) {
-        console.error('Failed to load settings from localStorage:', error);
+        console.error('Failed to load settings from server:', error);
+        
+        // Fallback to localStorage on server error
+        const savedSettings = localStorage.getItem('stripe-connect-settings');
+        if (savedSettings) {
+          try {
+            const parsedSettings = JSON.parse(savedSettings);
+            dispatch({ type: SETTINGS_ACTIONS.LOAD_SETTINGS, payload: parsedSettings });
+          } catch (error) {
+            console.error('Failed to load settings from localStorage:', error);
+          }
+        }
       }
-    }
-    setIsInitialized(true);
+      setIsInitialized(true);
+    };
+
+    loadSettings();
   }, []);
 
   // Save settings to localStorage (but not during initial load)

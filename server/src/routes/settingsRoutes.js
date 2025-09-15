@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/settings - Save all settings for user
-router.post('/', async (req, res) => {
+router.post('/', async (req, res) => { 
   try {
     const userId = req.body.userId || 'default';
     const settingsData = req.body.settings;

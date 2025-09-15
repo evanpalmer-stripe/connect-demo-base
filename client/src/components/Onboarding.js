@@ -9,11 +9,11 @@ const Onboarding = () => {
 
   const renderOnboardingFlow = () => {
     switch (onboarding.onboardingFlow) {
-      case 'Hosted':
+      case 'hosted':
         return <OnboardingHosted />;
-      case 'Embedded':
+      case 'embedded':
         return <OnboardingEmbedded />;
-      case 'API':
+      case 'api':
         return <OnboardingAPI />;
       default:
         return <OnboardingHosted />;

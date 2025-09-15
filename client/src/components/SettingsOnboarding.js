@@ -24,17 +24,17 @@ const SettingsOnboarding = () => {
 
   const onboardingFlowOptions = [
     { 
-      value: 'Hosted', 
+      value: 'hosted', 
       label: 'Hosted',
       description: 'Redirect users to Stripe-hosted onboarding pages'
     },
     { 
-      value: 'Embedded', 
+      value: 'embedded', 
       label: 'Embedded',
       description: 'Embed Stripe components directly in your application'
     },
     { 
-      value: 'API', 
+      value: 'api', 
       label: 'API',
       description: 'Build custom onboarding using Stripe API endpoints'
     }

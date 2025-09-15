@@ -16,6 +16,7 @@ const OnboardingHosted = () => {
         const data = await response.json();
         
         if (data.success && data.redirectUrl) {
+          // TODO: should redirect on the server side
           window.location.href = data.redirectUrl;
         } else {
           console.error('Failed to get redirect URL:', data.error);
