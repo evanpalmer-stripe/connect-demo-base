@@ -71,10 +71,78 @@ export const useStripeConnect = () => {
 
 const OnboardingEmbedded = () => {
   const [onboardingExited, setOnboardingExited] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [emailError, setEmailError] = useState('');
   const { stripeConnectInstance, isLoading, error } = useStripeConnect();
   const { general } = useGeneralSettings();
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailSubmit = (e) => {
+    e.preventDefault();
+    setEmailError('');
+    
+    if (!email.trim()) {
+      setEmailError('Please enter an email address');
+      return;
+    }
+    
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+    
+    setEmailSubmitted(true);
+  };
+
   console.log('Client - Publishable Key being used:', general.publishableKey ? `${general.publishableKey.substring(0, 10)}...` : 'NOT SET');
+
+  // Show email collection form if email hasn't been submitted yet
+  if (!emailSubmitted) {
+    return (
+      <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+        <div className="text-center mb-6">
+          <div className="text-green-600 font-medium mb-2">
+            🎯 Embedded Onboarding Flow
+          </div>
+          <p className="text-gray-600">
+            Please enter your email address to begin the onboarding process
+          </p>
+        </div>
+
+        <form onSubmit={handleEmailSubmit} className="max-w-md mx-auto">
+          <div className="mb-4">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="input input-primary input-md w-full"
+              placeholder="Enter your email address"
+              required
+            />
+            {emailError && (
+              <p className="text-red-600 text-sm mt-1">{emailError}</p>
+            )}
+          </div>
+          
+          <button
+            type="submit"
+            className="button button-primary button-md w-full"
+          >
+            Continue to Onboarding
+          </button>
+        </form>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -126,6 +194,9 @@ const OnboardingEmbedded = () => {
         <div className="text-green-600 font-medium mb-2">
           🎯 Embedded Onboarding Flow
         </div>
+        <p className="text-gray-600 text-sm">
+          Onboarding for: <span className="font-medium">{email}</span>
+        </p>
       </div>
 
       <div className="onboarding-container" style={{ 
