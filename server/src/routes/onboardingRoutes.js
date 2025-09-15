@@ -41,55 +41,71 @@ router.get('/hosted', async (req, res) => {
 });
 
 router.post('/create-account-with-email', async (req, res) => {
-  const settings = Settings.getSettings("default");
-
-  const email = req.body.email;
-  let user = User.getUserByEmail(email);
-
-  if(user) {
-    return res.json({
-      success: true,
-      id: user.accountId,
-      email: user.email,
-    });
-  }
-
-  const stripe = require("stripe")(
-    settings.general.secretKey
-  ); 
-  
-  // Create an empty account
-  const account = await stripe.accounts.create({
-    type: settings.onboarding.accountType,
-    country: settings.onboarding.country,
-    email: email,
-    // controller: {
-    //   stripe_dashboard: { // TODO: add dashboard type to the settings
-    //     type: settings.onboarding.dashboardType,
-    //   },
-    //   fees: {
-    //     payer: "application"
-    //   },
-    //   losses: {
-    //     payments: "application"
-    //   },
-    // },
-  }); 
-
-  console.log(`Created account: ${account.id}`);
-
-  // Save user to database
   try {
-    const user = User.createUser(req.body.email, account.id);
-    console.log(`Saved user to database: ${user.id}`);
-    return res.json({
-      success: true,
-      id: user.accountId,
-      email: user.email,
+    const settings = Settings.getSettings("default");
+    const email = req.body.email;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email is required'
+      });
+    }
+
+    // Check if user already exists
+    let user = User.getUserByEmail(email);
+    if (user) {
+      return res.json({
+        success: true,
+        id: user.accountId,
+        email: user.email,
+      });
+    }
+
+    const stripe = require("stripe")(settings.general.secretKey);
+    
+    // Create an empty account
+    const account = await stripe.accounts.create({
+      type: settings.onboarding.accountType,
+      country: settings.general.connectedAccountCountry || 'AU',
+      email: email,
+      // controller: {
+      //   stripe_dashboard: { // TODO: add dashboard type to the settings
+      //     type: settings.onboarding.dashboardType,
+      //   },
+      //   fees: {
+      //     payer: "application"
+      //   },
+      //   losses: {
+      //     payments: "application"
+      //   },
+      // },
+    }); 
+
+    console.log(`Created account: ${account.id}`);
+
+    // Save user to database using upsert method
+    try {
+      const user = User.createOrUpdateUser(email, account.id);
+      console.log(`Saved/updated user in database: ${user.id}`);
+      return res.json({
+        success: true,
+        id: user.accountId,
+        email: user.email,
+      });
+    } catch (dbError) {
+      console.error('Error saving user to database:', dbError);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to create user account'
+      });
+    }
+  } catch (error) {
+    console.error('Error in create-account-with-email:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to create account'
     });
-  } catch (dbError) {
-    console.error('Error saving user to database:', dbError);
-    throw dbError;
   }
 });
 

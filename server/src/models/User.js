@@ -19,6 +19,28 @@ class User {
     }
   }
 
+  // Create or update user (upsert)
+  static createOrUpdateUser(email, accountId) {
+    try {
+      // First try to get existing user
+      const existingUser = this.getUserByEmail(email);
+      if (existingUser) {
+        // Update the account ID if it's different
+        if (existingUser.accountId !== accountId) {
+          const updatedUser = this.updateUser(existingUser.id, { account_id: accountId });
+          return updatedUser || existingUser;
+        }
+        return existingUser;
+      }
+
+      // If user doesn't exist, create new one
+      return this.createUser(email, accountId);
+    } catch (error) {
+      console.error('Error in createOrUpdateUser:', error);
+      throw error;
+    }
+  }
+
   // Get user by ID
   static getUserById(id) {
     try {

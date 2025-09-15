@@ -15,3 +15,4 @@ export { default as SettingsSection } from './SettingsSection';
 export { default as SettingsGeneral } from './SettingsGeneral';
 export { default as SettingsOnboarding } from './SettingsOnboarding';
 export { default as DataDisplay } from './DataDisplay';
+export { default as StatusDisplay } from './StatusDisplay';

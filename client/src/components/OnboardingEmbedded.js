@@ -1,90 +1,72 @@
-import React from 'react';
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { loadConnectAndInitialize } from "@stripe/connect-js";
 import { ConnectAccountOnboarding, ConnectComponentsProvider } from "@stripe/react-connect-js";
 import { useGeneralSettings } from '../contexts/SettingsContext';
+import StatusDisplay from './StatusDisplay';
 
+// Custom hook for Stripe Connect
 export const useStripeConnect = (accountId) => {
-  const [stripeConnectInstance, setStripeConnectInstance] = useState();
+  const [stripeConnectInstance, setStripeConnectInstance] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const { general } = useGeneralSettings();
   const isInitialized = useRef(false);
 
-  useEffect(() => { 
-    if (isInitialized.current || !general.publishableKey || !accountId) {
-      return;
+  const fetchClientSecret = useCallback(async () => {
+    const response = await fetch(`/api/onboarding/embedded?account_id=${accountId}`);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to fetch client secret');
     }
+    const { client_secret: clientSecret } = await response.json();
+    return clientSecret;
+  }, [accountId]);
 
-    const fetchClientSecret = async () => {
+  useEffect(() => { 
+    if (isInitialized.current || !general.publishableKey || !accountId) return;
+
+    isInitialized.current = true;
+    setIsLoading(true);
+    setError(null);
+    
+    const initializeConnect = async () => {
       try {
-        const response = await fetch(`/api/onboarding/embedded?account_id=${accountId}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+        const connectInstance = loadConnectAndInitialize({
+          publishableKey: general.publishableKey,
+          fetchClientSecret,
+          appearance: { variables: {  } },
         });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Failed to fetch client secret:', errorData);
-          throw new Error(errorData.error || 'Failed to fetch client secret');
-        }
         
-        const { client_secret: clientSecret } = await response.json();
-        return clientSecret;
+        setStripeConnectInstance(connectInstance);
+        setIsLoading(false);
       } catch (err) {
-        console.error('Error fetching client secret:', err);
-        throw err;
+        setError(err.message);
+        setIsLoading(false);
       }
     };
 
-    isInitialized.current = true;
-    
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Initialize Stripe Connect JS - it will handle client secret fetching internally
-      const connectInstance = loadConnectAndInitialize({
-        publishableKey: general.publishableKey,
-        fetchClientSecret: fetchClientSecret,
-        appearance: {
-          variables: {
-            colorPrimary: '#625afa',
-          },
-        },
-      });
-      
-      // The instance is ready immediately, but the client secret will be fetched when needed
-      setStripeConnectInstance(connectInstance);
-      setIsLoading(false);
-    } catch (err) {
-      console.error('Failed to initialize Stripe Connect:', err);
-      setError(err.message);
-      setIsLoading(false);
-    }
-  }, [general.publishableKey, accountId]);
+    initializeConnect();
+
+    // Cleanup function
+    return () => {
+      isInitialized.current = false;
+    };
+  }, [general.publishableKey, accountId, fetchClientSecret]);
 
   return { stripeConnectInstance, isLoading, error };
 };
 
-const OnboardingEmbedded = () => {
-  const [onboardingExited, setOnboardingExited] = useState(false);
+// Email handling hook
+const useEmailSubmission = () => {
   const [email, setEmail] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [accountId, setAccountId] = useState(null);
-  const { stripeConnectInstance, isLoading, error } = useStripeConnect(accountId);
-  const { general } = useGeneralSettings();
 
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleEmailSubmit = async (e) => {
-      e.preventDefault();
+    e.preventDefault();
     setEmailError('');
     
     if (!email.trim()) {
@@ -100,9 +82,7 @@ const OnboardingEmbedded = () => {
     try {
       const response = await fetch('/api/onboarding/create-account-with-email', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
       
@@ -116,27 +96,28 @@ const OnboardingEmbedded = () => {
       setAccountId(data.id);
       setEmailSubmitted(true);
     } catch (error) {
-      console.error('Error creating account:', error);
       setEmailError('Failed to create account. Please try again.');
     }
   };
 
-  // Show email collection form if email hasn't been submitted yet
+  return { email, setEmail, emailSubmitted, emailError, accountId, handleEmailSubmit };
+};
+
+const OnboardingEmbedded = () => {
+  const { email, setEmail, emailSubmitted, emailError, accountId, handleEmailSubmit } = useEmailSubmission();
+  const { stripeConnectInstance, isLoading, error } = useStripeConnect(accountId);
+
+  // Email collection form
   if (!emailSubmitted) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-        <div className="text-center mb-6">
-          <div className="text-green-600 font-medium mb-2">
-            🎯 Embedded Onboarding Flow
-          </div>
-          <p className="text-gray-600">
-            Please enter your email address to begin the onboarding process
-          </p>
-        </div>
-
-        <form onSubmit={handleEmailSubmit} className="max-w-md mx-auto">
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+      <StatusDisplay 
+        type="success" 
+        title="🎯 Embedded Onboarding Flow"
+        message="Please enter your email address to begin the onboarding process"
+      >
+        <form onSubmit={handleEmailSubmit} className="max-w-md mx-auto mt-6">
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">
               Email Address
             </label>
             <input
@@ -144,111 +125,80 @@ const OnboardingEmbedded = () => {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="input input-primary input-md w-full"
+              className={`input input-md ${emailError ? 'input-error' : ''}`}
               placeholder="Enter your email address"
               required
             />
             {emailError && (
-              <p className="text-red-600 text-sm mt-1">{emailError}</p>
+              <p className="form-error">{emailError}</p>
             )}
           </div>
           
-          <button
-            type="submit"
-            className="button button-primary button-md w-full"
-          >
+          <button type="submit" className="btn btn-primary btn-md w-full">
             Continue to Onboarding
           </button>
         </form>
-      </div>
+      </StatusDisplay>
     );
   }
 
+  // Loading state
   if (isLoading) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-        <div className="text-center">
-          <div className="text-green-600 font-medium mb-2">
-            🎯 Embedded Onboarding Flow
-          </div>
-          <div className="text-gray-600">Loading Stripe Connect...</div>
-        </div>
-      </div>
+      <StatusDisplay 
+        type="success" 
+        title="🎯 Embedded Onboarding Flow"
+        message="Loading Stripe Connect..."
+      />
     );
   }
 
+  // Error state
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-        <div className="text-center">
-          <div className="text-red-600 font-medium mb-2">
-            ❌ Error Loading Onboarding
-          </div>
-          <div className="text-red-800 text-sm mb-3">
-            {error}
-          </div>
-          <div className="text-red-600 text-xs">
-            Please check your Stripe API keys in the settings
-          </div>
+      <StatusDisplay 
+        type="error" 
+        title="❌ Error Loading Onboarding"
+        message={error}
+      >
+        <div className="form-error text-xs mt-3">
+          Please check your Stripe API keys in the settings
         </div>
-      </div>
+      </StatusDisplay>
     );
   }
 
+  // Not initialized state
   if (!stripeConnectInstance) {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-        <div className="text-center">
-          <div className="text-yellow-600 font-medium mb-2">
-            ⏳ Initializing Stripe Connect
-          </div>
-          <div className="text-gray-600">Setting up the Connect instance...</div>
-        </div>
-      </div>
+      <StatusDisplay 
+        type="warning" 
+        title="⏳ Initializing Stripe Connect"
+        message="Setting up the Connect instance..."
+      />
     );
   }
 
+  // Main onboarding component
   return (
-    <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-      <div className="text-center mb-4">
-        <div className="text-green-600 font-medium mb-2">
-          🎯 Embedded Onboarding Flow
-        </div>
-        <p className="text-gray-600 text-sm">
-          Onboarding for: <span className="font-medium">{email}</span>
-        </p>
-      </div>
-
-      <div className="onboarding-container" style={{ 
+    <StatusDisplay 
+      type="success" 
+      title="🎯 Embedded Onboarding Flow"
+      message={`Onboarding for: ${email}`}
+    >
+      <div className="mt-4" style={{ 
         position: 'relative', 
         zIndex: 1,
         minHeight: '400px',
         width: '100%'
       }}>
-        <ConnectComponentsProvider 
-          connectInstance={stripeConnectInstance}
-        >
+        <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
           <ConnectAccountOnboarding
-            onExit={() => {
-              console.log("The account has exited onboarding");
-              setOnboardingExited(true);
-            }}
-            // Optional: make sure to follow our policy instructions above
-            // fullTermsOfServiceUrl="{{URL}}"
-            // recipientTermsOfServiceUrl="{{URL}}"
-            // privacyPolicyUrl="{{URL}}"
-            // skipTermsOfServiceCollection={false}
-            // collectionOptions={{
-            //   fields: 'eventually_due',
-            //   futureRequirements: 'include',
-            // }}
-            // onStepChange={(stepChange) => {
-            //   console.log(`User entered: ${stepChange.step}`);
-            // }}
+            onExit={() => console.log("The account has exited onboarding")}
           />
         </ConnectComponentsProvider>
       </div>
-    </div>
+    </StatusDisplay>
   );
 };
 
