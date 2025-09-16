@@ -3,10 +3,13 @@ const router = express.Router();
 const Settings = require('../models/Settings');
 const User = require('../models/User');
 
+// Explicitly load environment variables in this file
+require('dotenv').config();
 
 // GET /api/onboarding/hosted - Returns test redirect URL
 router.get('/hosted', async (req, res) => {
   try {
+
     const settings = Settings.getSettings("default");
   
     const stripe = require("stripe")(
@@ -16,21 +19,21 @@ router.get('/hosted', async (req, res) => {
     // Create an empty account 
     const account = await stripe.accounts.create({
       type: settings.onboarding.accountType,
-      country: 'AU',
+      country: settings.general.connectedAccountCountry,
     });  
 
+    const baseUrl = process.env.CLIENT_BASE_URL;
+    console.log('baseUrl after assignment:', baseUrl);
    // Create an account link to begin onboarding
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      return_url: `${req.headers.origin}/return/${account.id}`,
-      refresh_url: `${req.headers.origin}/refresh/${account.id}`,
+      return_url: `${baseUrl}/return/${account.id}`,
+      refresh_url: `${baseUrl}/refresh/${account.id}`,
       type: "account_onboarding",
     });
 
-    res.json({
-      success: true,
-      redirectUrl: accountLink
-    });
+    res.redirect(accountLink.url);
+
   } catch (error) {
     console.error('Error generating hosted onboarding URL:', error);
     res.status(500).json({
