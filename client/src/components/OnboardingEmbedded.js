@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { loadConnectAndInitialize } from "@stripe/connect-js";
 import { ConnectAccountOnboarding, ConnectComponentsProvider } from "@stripe/react-connect-js";
 import { useGeneralSettings } from '../contexts/SettingsContext';
+import { useEmailSubmission } from '../hooks/useEmailSubmission';
 import StatusDisplay from './StatusDisplay';
+import EmailCaptureForm from './EmailCaptureForm';
 
 // Custom hook for Stripe Connect
 export const useStripeConnect = (accountId) => {
@@ -56,52 +58,6 @@ export const useStripeConnect = (accountId) => {
   return { stripeConnectInstance, isLoading, error };
 };
 
-// Email handling hook
-const useEmailSubmission = () => {
-  const [email, setEmail] = useState('');
-  const [emailSubmitted, setEmailSubmitted] = useState(false);
-  const [emailError, setEmailError] = useState('');
-  const [accountId, setAccountId] = useState(null);
-
-  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const handleEmailSubmit = async (e) => {
-    e.preventDefault();
-    setEmailError('');
-    
-    if (!email.trim()) {
-      setEmailError('Please enter an email address');
-      return;
-    }
-    
-    if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email address');
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/onboarding/create-account-with-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        setEmailError(errorData.error || 'Failed to create account');
-        return;
-      }
-      
-      const data = await response.json();
-      setAccountId(data.id);
-      setEmailSubmitted(true);
-    } catch (error) {
-      setEmailError('Failed to create account. Please try again.');
-    }
-  };
-
-  return { email, setEmail, emailSubmitted, emailError, accountId, handleEmailSubmit };
-};
 
 const OnboardingEmbedded = () => {
   const { email, setEmail, emailSubmitted, emailError, accountId, handleEmailSubmit } = useEmailSubmission();
@@ -115,29 +71,13 @@ const OnboardingEmbedded = () => {
         title="🎯 Embedded Onboarding Flow"
         message="Please enter your email address to begin the onboarding process"
       >
-        <form onSubmit={handleEmailSubmit} className="max-w-md mx-auto mt-6">
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={`input input-md ${emailError ? 'input-error' : ''}`}
-              placeholder="Enter your email address"
-              required
-            />
-            {emailError && (
-              <p className="form-error">{emailError}</p>
-            )}
-          </div>
-          
-          <button type="submit" className="btn btn-primary btn-md w-full">
-            Continue to Onboarding
-          </button>
-        </form>
+        <EmailCaptureForm
+          email={email}
+          setEmail={setEmail}
+          emailError={emailError}
+          handleEmailSubmit={handleEmailSubmit}
+          buttonText="Continue to Onboarding"
+        />
       </StatusDisplay>
     );
   }
