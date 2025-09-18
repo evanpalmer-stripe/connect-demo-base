@@ -18,6 +18,7 @@ function App() {
               <Route index element={<HomePage />} />
               <Route path="login" element={<Login />} />
               <Route path="onboarding" element={<Onboarding />} />
+              <Route path="onboarding/:accountId" element={<Onboarding />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="payments" element={<Payments />} />
               <Route path="*" element={<HomePage />} />

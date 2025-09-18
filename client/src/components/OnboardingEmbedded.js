@@ -63,7 +63,6 @@ const OnboardingEmbedded = () => {
   const { email, setEmail, emailSubmitted, emailError, accountId, handleEmailSubmit } = useEmailSubmission();
   const { stripeConnectInstance, isLoading, error } = useStripeConnect(accountId);
 
-  // Email collection form
   if (!emailSubmitted) {
     return (
       <StatusDisplay 

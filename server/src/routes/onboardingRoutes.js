@@ -11,24 +11,19 @@ router.get('/hosted', async (req, res) => {
   try {
 
     const settings = Settings.getSettings("default");
-  
     const stripe = require("stripe")(
       settings.general.secretKey
     ); 
-
-    // Create an empty account 
-    const account = await stripe.accounts.create({
-      type: settings.onboarding.accountType,
-      country: settings.general.connectedAccountCountry,
-    });  
+    
+    let accountId = req.query.account_id;
 
     const baseUrl = process.env.CLIENT_BASE_URL;
     console.log('baseUrl after assignment:', baseUrl);
    // Create an account link to begin onboarding
     const accountLink = await stripe.accountLinks.create({
-      account: account.id,
-      return_url: `${baseUrl}/return/${account.id}`,
-      refresh_url: `${baseUrl}/refresh/${account.id}`,
+      account: accountId,
+      return_url: `${baseUrl}/onbaording/${accountId}?status=return`,
+      refresh_url: `${baseUrl}/refresh/${accountId}?status=refresh`,
       type: "account_onboarding",
     });
 
