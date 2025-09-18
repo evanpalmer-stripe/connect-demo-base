@@ -17,6 +17,7 @@ const SettingsDatabase = () => {
   const [editingData, setEditingData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
 
   // Fetch available tables
   useEffect(() => {
@@ -160,8 +161,27 @@ const SettingsDatabase = () => {
     return 'text';
   };
 
+  const copyToClipboard = async (value) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setToast('Added to clipboard');
+      setTimeout(() => setToast(null), 2000);
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      setToast('Failed to copy to clipboard');
+      setTimeout(() => setToast(null), 2000);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300">
+          {toast}
+        </div>
+      )}
+
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
           {error}
@@ -266,7 +286,13 @@ const SettingsDatabase = () => {
                                 disabled={column.name === 'id'}
                               />
                             ) : (
-                              <span>{row[column.name] || '-'}</span>
+                              <span 
+                                className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded transition-colors duration-150"
+                                onClick={() => copyToClipboard(row[column.name] || '')}
+                                title="Click to copy to clipboard"
+                              >
+                                {row[column.name] || '-'}
+                              </span>
                             )}
                           </td>
                         ))}
