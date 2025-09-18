@@ -19,6 +19,7 @@ class Settings {
         onboarding: result.onboarding ? JSON.parse(result.onboarding) : {},
         payment: result.payment ? JSON.parse(result.payment) : {},
         logs: result.logs ? JSON.parse(result.logs) : {},
+        database: result.database ? JSON.parse(result.database) : {},
         ui: result.ui ? JSON.parse(result.ui) : {},
         createdAt: result.created_at,
         updatedAt: result.updated_at
@@ -38,7 +39,7 @@ class Settings {
         // Update existing settings
         const stmt = db.prepare(`
           UPDATE settings 
-          SET general = ?, onboarding = ?, payment = ?, logs = ?, ui = ?
+          SET general = ?, onboarding = ?, payment = ?, logs = ?, database = ?, ui = ?
           WHERE user_id = ?
         `);
         
@@ -47,14 +48,15 @@ class Settings {
           JSON.stringify(settingsData.onboarding || {}),
           JSON.stringify(settingsData.payment || {}),
           JSON.stringify(settingsData.logs || {}),
+          JSON.stringify(settingsData.database || {}),
           JSON.stringify(settingsData.ui || {}),
           userId
         );
       } else {
         // Insert new settings
         const stmt = db.prepare(`
-          INSERT INTO settings (user_id, general, onboarding, payment, logs, ui)
-          VALUES (?, ?, ?, ?, ?, ?)
+          INSERT INTO settings (user_id, general, onboarding, payment, logs, database, ui)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
         `);
         
         stmt.run(
@@ -63,6 +65,7 @@ class Settings {
           JSON.stringify(settingsData.onboarding || {}),
           JSON.stringify(settingsData.payment || {}),
           JSON.stringify(settingsData.logs || {}),
+          JSON.stringify(settingsData.database || {}),
           JSON.stringify(settingsData.ui || {})
         );
       }
@@ -82,6 +85,7 @@ class Settings {
         onboarding: {},
         payment: {},
         logs: {},
+        database: {},
         ui: {}
       };
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { Tab } from '@headlessui/react';
 import SettingsGeneral from './SettingsGeneral';
 import SettingsOnboarding from './SettingsOnboarding';
+import SettingsDatabase from './SettingsDatabase';
 import { useUISettings } from '../contexts/SettingsContext';
 
 const SettingsSection = () => {
@@ -17,7 +18,15 @@ const SettingsSection = () => {
       content: <SettingsOnboarding />
     },
     { name: 'Payment', content: 'Payment settings content goes here' },
-    { name: 'Logs', content: 'Logs content goes here' }
+    { name: 'Logs', content: 'Logs content goes here' },
+    { 
+      name: 'Dashboard', 
+      content: 'Dashboard content goes here'
+    },
+    { 
+      name: 'Database', 
+      content: <SettingsDatabase />
+    },
   ];
 
   const handleTabChange = (index) => {

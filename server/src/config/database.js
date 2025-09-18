@@ -39,11 +39,22 @@ const initDatabase = () => {
         onboarding TEXT, -- JSON string for onboarding settings
         payment TEXT, -- JSON string for payment settings
         logs TEXT, -- JSON string for log settings
+        database TEXT, -- JSON string for database settings
         ui TEXT, -- JSON string for UI settings
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Add database column if it doesn't exist (migration)
+    try {
+      db.exec(`ALTER TABLE settings ADD COLUMN database TEXT`);
+    } catch (error) {
+      // Column already exists, ignore error
+      if (!error.message.includes('duplicate column name')) {
+        console.error('Error adding database column:', error);
+      }
+    }
 
     // Create trigger to update updated_at timestamp
     db.exec(`

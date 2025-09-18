@@ -14,6 +14,7 @@ router.get('/', async (req, res) => {
         onboarding: {},
         payment: {},
         logs: {},
+        database: {},
         ui: {}
       });
     }
@@ -23,6 +24,7 @@ router.get('/', async (req, res) => {
       onboarding: settings.onboarding,
       payment: settings.payment,
       logs: settings.logs,
+      database: settings.database,
       ui: settings.ui
     });
   } catch (error) {
@@ -50,6 +52,7 @@ router.post('/', async (req, res) => {
         onboarding: savedSettings.onboarding,
         payment: savedSettings.payment,
         logs: savedSettings.logs,
+        database: savedSettings.database,
         ui: savedSettings.ui
       }
     });
@@ -70,7 +73,7 @@ router.put('/:category', async (req, res) => {
       return res.status(400).json({ error: 'Updates data is required' });
     }
 
-    const validCategories = ['general', 'onboarding', 'payment', 'logs', 'ui'];
+    const validCategories = ['general', 'onboarding', 'payment', 'logs', 'database', 'ui'];
     if (!validCategories.includes(category)) {
       return res.status(400).json({ error: 'Invalid category' });
     }
@@ -84,6 +87,7 @@ router.put('/:category', async (req, res) => {
         onboarding: updatedSettings.onboarding,
         payment: updatedSettings.payment,
         logs: updatedSettings.logs,
+        database: updatedSettings.database,
         ui: updatedSettings.ui
       }
     });

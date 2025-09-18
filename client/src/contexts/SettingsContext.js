@@ -18,6 +18,11 @@ const initialSettings = {
   logs: {
     // Add log settings here when needed
   },
+  database: {
+    type: '',
+    connectionString: '',
+    autoBackup: false,
+  },
   ui: {
     activeTab: 0, // Default to first tab (General)
   }
@@ -29,6 +34,7 @@ const SETTINGS_ACTIONS = {
   UPDATE_ONBOARDING: 'UPDATE_ONBOARDING',
   UPDATE_PAYMENT: 'UPDATE_PAYMENT',
   UPDATE_LOGS: 'UPDATE_LOGS',
+  UPDATE_DATABASE: 'UPDATE_DATABASE',
   UPDATE_UI: 'UPDATE_UI',
   RESET_SETTINGS: 'RESET_SETTINGS',
   LOAD_SETTINGS: 'LOAD_SETTINGS',
@@ -59,6 +65,11 @@ const settingsReducer = (state, action) => {
         ...state,
         logs: { ...state.logs, ...action.payload }
       };
+    case SETTINGS_ACTIONS.UPDATE_DATABASE:
+      return {
+        ...state,
+        database: { ...state.database, ...action.payload }
+      };
     case SETTINGS_ACTIONS.UPDATE_UI:
       return {
         ...state,
@@ -74,6 +85,7 @@ const settingsReducer = (state, action) => {
         onboarding: { ...initialSettings.onboarding, ...(action.payload.onboarding || {}) },
         payment: { ...initialSettings.payment, ...(action.payload.payment || {}) },
         logs: { ...initialSettings.logs, ...(action.payload.logs || {}) },
+        database: { ...initialSettings.database, ...(action.payload.database || {}) },
         ui: { ...initialSettings.ui, ...(action.payload.ui || {}) },
         isLoading: false,
         error: null,
@@ -113,6 +125,7 @@ export const SettingsProvider = ({ children }) => {
             (serverSettings.onboarding && Object.keys(serverSettings.onboarding).length > 0) ||
             (serverSettings.payment && Object.keys(serverSettings.payment).length > 0) ||
             (serverSettings.logs && Object.keys(serverSettings.logs).length > 0) ||
+            (serverSettings.database && Object.keys(serverSettings.database).length > 0) ||
             (serverSettings.ui && Object.keys(serverSettings.ui).length > 0)
           );
           
@@ -169,6 +182,7 @@ export const SettingsProvider = ({ children }) => {
         onboarding: settings.onboarding,
         payment: settings.payment,
         logs: settings.logs,
+        database: settings.database,
         ui: settings.ui,
       }));
     }
@@ -193,6 +207,7 @@ export const SettingsProvider = ({ children }) => {
               onboarding: settings.onboarding,
               payment: settings.payment,
               logs: settings.logs,
+              database: settings.database,
               ui: settings.ui,
             },
             userId: 'default'
@@ -222,7 +237,7 @@ export const SettingsProvider = ({ children }) => {
         clearTimeout(newTimeoutId);
       }
     };
-  }, [settings.general, settings.onboarding, settings.payment, settings.logs, settings.ui, isInitialized, settings.isLoading]);
+  }, [settings.general, settings.onboarding, settings.payment, settings.logs, settings.database, settings.ui, isInitialized, settings.isLoading]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -250,6 +265,10 @@ export const SettingsProvider = ({ children }) => {
     dispatch({ type: SETTINGS_ACTIONS.UPDATE_LOGS, payload: updates });
   }, []);
 
+  const updateDatabase = useCallback((updates) => {
+    dispatch({ type: SETTINGS_ACTIONS.UPDATE_DATABASE, payload: updates });
+  }, []);
+
   const updateUI = useCallback((updates) => {
     dispatch({ type: SETTINGS_ACTIONS.UPDATE_UI, payload: updates });
   }, []);
@@ -264,6 +283,7 @@ export const SettingsProvider = ({ children }) => {
     updateOnboarding,
     updatePayment,
     updateLogs,
+    updateDatabase,
     updateUI,
     resetSettings,
   };
@@ -314,6 +334,14 @@ export const useLogsSettings = () => {
   return {
     logs: settings.logs,
     updateLogs,
+  };
+};
+
+export const useDatabaseSettings = () => {
+  const { settings, updateDatabase } = useSettings();
+  return {
+    database: settings.database,
+    updateDatabase,
   };
 };
 
