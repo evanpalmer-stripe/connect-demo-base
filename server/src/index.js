@@ -23,11 +23,13 @@ app.use(express.json());
 const settingsRoutes = require('./routes/settingsRoutes');
 const onboardingRoutes = require('./routes/onboardingRoutes');
 const userRoutes = require('./routes/userRoutes');
+const databaseRoutes = require('./routes/databaseRoutes');
 
 // Routes
 app.use('/api/settings', settingsRoutes);
 app.use('/api/onboarding', onboardingRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/database', databaseRoutes);
 
 app.get('/api/data', (req, res) => {
   res.json({
