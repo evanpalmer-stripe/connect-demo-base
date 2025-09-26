@@ -131,7 +131,7 @@ router.get('/embedded', async (req, res) => {
           enabled: true,  // true | false 
         },
         payments: {
-          enabled: true,  // true | false 
+          enabled: true,  // true | false
           features: {
             capture_payments: true,  // true | false 
             dispute_management: true,  // true | false 
