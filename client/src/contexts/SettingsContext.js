@@ -12,6 +12,9 @@ const initialSettings = {
     accountType: 'standard',
     onboardingFlow: 'hosted',
   },
+  dashboard: {
+    type: 'stripe',
+  },
   payment: {
     // Add payment settings here when needed
   },
@@ -32,6 +35,7 @@ const initialSettings = {
 const SETTINGS_ACTIONS = {
   UPDATE_GENERAL: 'UPDATE_GENERAL',
   UPDATE_ONBOARDING: 'UPDATE_ONBOARDING',
+  UPDATE_DASHBOARD: 'UPDATE_DASHBOARD',
   UPDATE_PAYMENT: 'UPDATE_PAYMENT',
   UPDATE_LOGS: 'UPDATE_LOGS',
   UPDATE_DATABASE: 'UPDATE_DATABASE',
@@ -54,6 +58,11 @@ const settingsReducer = (state, action) => {
       return {
         ...state,
         onboarding: { ...state.onboarding, ...action.payload }
+      };
+    case SETTINGS_ACTIONS.UPDATE_DASHBOARD:
+      return {
+        ...state,
+        dashboard: { ...state.dashboard, ...action.payload }
       };
     case SETTINGS_ACTIONS.UPDATE_PAYMENT:
       return {
@@ -83,6 +92,7 @@ const settingsReducer = (state, action) => {
         // Deep merge with proper fallbacks - only merge if payload has data
         general: { ...initialSettings.general, ...(action.payload.general || {}) },
         onboarding: { ...initialSettings.onboarding, ...(action.payload.onboarding || {}) },
+        dashboard: { ...initialSettings.dashboard, ...(action.payload.dashboard || {}) },
         payment: { ...initialSettings.payment, ...(action.payload.payment || {}) },
         logs: { ...initialSettings.logs, ...(action.payload.logs || {}) },
         database: { ...initialSettings.database, ...(action.payload.database || {}) },
@@ -123,6 +133,7 @@ export const SettingsProvider = ({ children }) => {
           const hasData = serverSettings && (
             (serverSettings.general && Object.keys(serverSettings.general).length > 0) ||
             (serverSettings.onboarding && Object.keys(serverSettings.onboarding).length > 0) ||
+            (serverSettings.dashboard && Object.keys(serverSettings.dashboard).length > 0) ||
             (serverSettings.payment && Object.keys(serverSettings.payment).length > 0) ||
             (serverSettings.logs && Object.keys(serverSettings.logs).length > 0) ||
             (serverSettings.database && Object.keys(serverSettings.database).length > 0) ||
@@ -180,6 +191,7 @@ export const SettingsProvider = ({ children }) => {
       localStorage.setItem('stripe-connect-settings', JSON.stringify({
         general: settings.general,
         onboarding: settings.onboarding,
+        dashboard: settings.dashboard,
         payment: settings.payment,
         logs: settings.logs,
         database: settings.database,
@@ -205,6 +217,7 @@ export const SettingsProvider = ({ children }) => {
             settings: {
               general: settings.general,
               onboarding: settings.onboarding,
+              dashboard: settings.dashboard,
               payment: settings.payment,
               logs: settings.logs,
               database: settings.database,
@@ -237,7 +250,7 @@ export const SettingsProvider = ({ children }) => {
         clearTimeout(newTimeoutId);
       }
     };
-  }, [settings.general, settings.onboarding, settings.payment, settings.logs, settings.database, settings.ui, isInitialized, settings.isLoading]);
+  }, [settings.general, settings.onboarding, settings.dashboard, settings.payment, settings.logs, settings.database, settings.ui, isInitialized, settings.isLoading]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -255,6 +268,10 @@ export const SettingsProvider = ({ children }) => {
 
   const updateOnboarding = useCallback((updates) => {
     dispatch({ type: SETTINGS_ACTIONS.UPDATE_ONBOARDING, payload: updates });
+  }, []);
+
+  const updateDashboard = useCallback((updates) => {
+    dispatch({ type: SETTINGS_ACTIONS.UPDATE_DASHBOARD, payload: updates });
   }, []);
 
   const updatePayment = useCallback((updates) => {
@@ -281,6 +298,7 @@ export const SettingsProvider = ({ children }) => {
     settings,
     updateGeneral,
     updateOnboarding,
+    updateDashboard,
     updatePayment,
     updateLogs,
     updateDatabase,
@@ -318,6 +336,14 @@ export const useOnboardingSettings = () => {
   return {
     onboarding: settings.onboarding,
     updateOnboarding,
+  };
+};
+
+export const useDashboardSettings = () => {
+  const { settings, updateDashboard } = useSettings();
+  return {
+    dashboard: settings.dashboard,
+    updateDashboard,
   };
 };
 

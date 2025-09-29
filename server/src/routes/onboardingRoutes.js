@@ -67,17 +67,17 @@ router.post('/create-account-with-email', async (req, res) => {
       type: settings.onboarding.accountType,
       country: settings.general.connectedAccountCountry || 'AU',
       email: email,
-      // controller: {
-      //   stripe_dashboard: { // TODO: add dashboard type to the settings
-      //     type: settings.onboarding.dashboardType,
-      //   },
+      controller: {
+         stripe_dashboard: { 
+           type: settings.onboarding.dashboardType,
+         },
       //   fees: {
       //     payer: "application"
       //   },
       //   losses: {
       //     payments: "application"
       //   },
-      // },
+       },
     }); 
 
     console.log(`Created account: ${account.id}`);

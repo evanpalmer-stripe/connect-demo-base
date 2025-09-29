@@ -25,6 +25,7 @@ const onboardingRoutes = require('./routes/onboardingRoutes');
 const userRoutes = require('./routes/userRoutes');
 const databaseRoutes = require('./routes/databaseRoutes');
 const authRoutes = require('./routes/authRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 // Routes
 app.use('/api/settings', settingsRoutes);
@@ -32,6 +33,7 @@ app.use('/api/onboarding', onboardingRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/database', databaseRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 app.get('/api/data', (req, res) => {
   res.json({

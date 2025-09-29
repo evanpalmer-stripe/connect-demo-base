@@ -17,6 +17,7 @@ class Settings {
         userId: result.user_id,
         general: result.general ? JSON.parse(result.general) : {},
         onboarding: result.onboarding ? JSON.parse(result.onboarding) : {},
+        dashboard: result.dashboard ? JSON.parse(result.dashboard) : {},
         payment: result.payment ? JSON.parse(result.payment) : {},
         logs: result.logs ? JSON.parse(result.logs) : {},
         database: result.database ? JSON.parse(result.database) : {},
@@ -39,13 +40,14 @@ class Settings {
         // Update existing settings
         const stmt = db.prepare(`
           UPDATE settings 
-          SET general = ?, onboarding = ?, payment = ?, logs = ?, database = ?, ui = ?
+          SET general = ?, onboarding = ?, dashboard = ?, payment = ?, logs = ?, database = ?, ui = ?
           WHERE user_id = ?
         `);
         
         stmt.run(
           JSON.stringify(settingsData.general || {}),
           JSON.stringify(settingsData.onboarding || {}),
+          JSON.stringify(settingsData.dashboard || {}),
           JSON.stringify(settingsData.payment || {}),
           JSON.stringify(settingsData.logs || {}),
           JSON.stringify(settingsData.database || {}),
@@ -55,14 +57,15 @@ class Settings {
       } else {
         // Insert new settings
         const stmt = db.prepare(`
-          INSERT INTO settings (user_id, general, onboarding, payment, logs, database, ui)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO settings (user_id, general, onboarding, dashboard, payment, logs, database, ui)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `);
         
         stmt.run(
           userId,
           JSON.stringify(settingsData.general || {}),
           JSON.stringify(settingsData.onboarding || {}),
+          JSON.stringify(settingsData.dashboard || {}),
           JSON.stringify(settingsData.payment || {}),
           JSON.stringify(settingsData.logs || {}),
           JSON.stringify(settingsData.database || {}),
@@ -83,6 +86,7 @@ class Settings {
       const existingSettings = this.getSettings(userId) || {
         general: {},
         onboarding: {},
+        dashboard: {},
         payment: {},
         logs: {},
         database: {},

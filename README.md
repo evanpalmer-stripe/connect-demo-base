@@ -132,3 +132,12 @@ This is a basic MERN stack setup. You can extend it by:
 - Adding data models and CRUD operations
 - Implementing real-time features with Socket.io
 - Adding testing with Jest and React Testing Library
+
+## Todo List
+
+### All
+- [ ] Add a default for the database - should auto pull up users table
+- [ ] Add a webhook for successful onboarding
+- [ ] Add different payment flows
+- [ ] Add a CMS
+- [ ] Inline Fix styles

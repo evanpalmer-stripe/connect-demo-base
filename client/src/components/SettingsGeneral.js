@@ -28,7 +28,7 @@ const SettingsGeneral = () => {
       const data = await response.json();
       
       if (response.ok) {
-        updateGeneral({ isVerified: data.isVerified });
+        updateGeneral({ isVerified: data.isVerified, accountId: data.accountId });
       } else {
         updateGeneral({ isVerified: false });
         console.error('Verification failed:', data.error);
@@ -60,6 +60,9 @@ const SettingsGeneral = () => {
       {/* Verification Status */}
       <div className="flex items-center justify-between p-4 rounded-lg">
         <div className="flex items-center space-x-3">
+          {general.isVerified && (
+            <h3>{general.accountId}</h3>
+          )}
           <span className={`badge ${general.isVerified ? 'badge-success' : 'badge-error'}`}>
             {isVerifying ? (
               <>

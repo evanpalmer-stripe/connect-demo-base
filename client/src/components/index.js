@@ -15,5 +15,6 @@ export { default as ControlPanel } from './ControlPanel';
 export { default as SettingsSection } from './SettingsSection';
 export { default as SettingsGeneral } from './SettingsGeneral';
 export { default as SettingsOnboarding } from './SettingsOnboarding';
+export { default as SettingsDashboard } from './SettingsDashboard';
 export { default as DataDisplay } from './DataDisplay';
 export { default as StatusDisplay } from './StatusDisplay';
